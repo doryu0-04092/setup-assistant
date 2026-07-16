@@ -11,12 +11,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -26,22 +23,16 @@ import androidx.compose.ui.unit.dp
 import com.setupassistant.app.data.SetupGuide
 import com.setupassistant.app.data.SetupGuides
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetupGuideScreen() {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("セットアップ手順") }) }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(SetupGuides.all) { guide ->
-                SetupGuideCard(guide)
-            }
+fun SetupGuideScreen(modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(SetupGuides.all) { guide ->
+            SetupGuideCard(guide)
         }
     }
 }
