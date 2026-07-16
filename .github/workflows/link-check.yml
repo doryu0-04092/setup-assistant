@@ -25,7 +25,8 @@ jobs:
           )
           fail=0
           for url in "${urls[@]}"; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "$url")
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 \
+              -A "Mozilla/5.0 (compatible; setup-assistant-link-check/1.0)" "$url")
             if [[ "$code" -ge 400 ]]; then
               echo "::error::$url returned HTTP $code"
               fail=1
