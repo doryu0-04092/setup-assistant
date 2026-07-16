@@ -23,13 +23,18 @@ jobs:
             "https://platform.openai.com/api-keys"
             "https://docs.github.com/en/get-started/quickstart/set-up-git"
           )
+          # 401/403 are treated as non-fatal: many sites (e.g. Cloudflare-protected
+          # pages) block plain curl requests as a bot even though the page is fine
+          # for real users. Only 404/410 (gone) and 5xx (server error) fail the check.
           fail=0
           for url in "${urls[@]}"; do
             code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 \
               -A "Mozilla/5.0 (compatible; setup-assistant-link-check/1.0)" "$url")
-            if [[ "$code" -ge 400 ]]; then
+            if [[ "$code" == "404" || "$code" == "410" || "$code" -ge 500 ]]; then
               echo "::error::$url returned HTTP $code"
               fail=1
+            elif [[ "$code" -ge 400 ]]; then
+              echo "::warning::$url returned HTTP $code (likely bot-blocked, not treated as dead)"
             else
               echo "OK ($code): $url"
             fi
