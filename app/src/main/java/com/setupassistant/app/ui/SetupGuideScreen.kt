@@ -52,6 +52,11 @@ private fun SetupGuideCard(guide: SetupGuide) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = guide.title, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "公式サイトで最終確認: ${guide.lastVerified}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             guide.steps.forEachIndexed { index, step ->
                 Row {

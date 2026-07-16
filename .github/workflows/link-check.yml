@@ -1,0 +1,36 @@
+name: Link Check
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "app/src/main/java/com/setupassistant/app/data/SetupGuide.kt"
+      - ".github/workflows/link-check.yml"
+  schedule:
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check official URLs are reachable
+        run: |
+          # Keep this list in sync with SetupGuide.kt's officialUrl values
+          urls=(
+            "https://docs.claude.com/en/docs/claude-code/overview"
+            "https://code.visualstudio.com/download"
+            "https://platform.openai.com/api-keys"
+            "https://docs.github.com/en/get-started/quickstart/set-up-git"
+          )
+          fail=0
+          for url in "${urls[@]}"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "$url")
+            if [[ "$code" -ge 400 ]]; then
+              echo "::error::$url returned HTTP $code"
+              fail=1
+            else
+              echo "OK ($code): $url"
+            fi
+          done
+          exit $fail
