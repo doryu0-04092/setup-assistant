@@ -18,8 +18,8 @@ jobs:
         run: |
           # Keep this list in sync with SetupGuide.kt's officialUrl values
           urls=(
-            "https://docs.claude.com/en/docs/claude-code/overview"
-            "https://code.visualstudio.com/download"
+            "https://www.cursor.com/downloads"
+            "https://code.claude.com/docs/en/vscode"
             "https://platform.openai.com/api-keys"
             "https://docs.github.com/en/get-started/quickstart/set-up-git"
           )

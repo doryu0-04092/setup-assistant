@@ -11,27 +11,27 @@ data class SetupGuide(
 object SetupGuides {
     val all: List<SetupGuide> = listOf(
         SetupGuide(
-            id = "claude-code",
-            title = "Claude Code",
-            steps = listOf(
-                "Node.js(18以上)をインストールする",
-                "ターミナルで npm install -g @anthropic-ai/claude-code を実行する",
-                "claude コマンドを実行し、案内に従ってログイン(またはAPIキーを設定)する",
-                "プロジェクトフォルダで claude を起動し、正常に動くか確認する"
-            ),
-            officialUrl = "https://docs.claude.com/en/docs/claude-code/overview",
-            lastVerified = "2026-07-17"
-        ),
-        SetupGuide(
-            id = "vscode",
-            title = "VSCode",
+            id = "cursor",
+            title = "Cursor",
             steps = listOf(
                 "公式サイトからOSに合ったインストーラをダウンロードする",
                 "インストーラを実行してセットアップを完了する",
-                "拡張機能タブから必要な拡張機能を検索してインストールする",
+                "初回起動時にアカウントを作成、またはログインする",
                 "起動して正常に立ち上がることを確認する"
             ),
-            officialUrl = "https://code.visualstudio.com/download",
+            officialUrl = "https://www.cursor.com/downloads",
+            lastVerified = "2026-07-17"
+        ),
+        SetupGuide(
+            id = "claude-code",
+            title = "Claude Code",
+            steps = listOf(
+                "Cursorを起動し、拡張機能タブ(Extensions)を開く",
+                "「Claude Code」で検索し、Anthropic公式の拡張機能をインストールする",
+                "インストール後に表示されるサインイン画面からAnthropicアカウントでログインする(有料プランがあればAPIキー不要)",
+                "エディタ右上のスパークアイコンからClaude Codeパネルが開くことを確認する"
+            ),
+            officialUrl = "https://code.claude.com/docs/en/vscode",
             lastVerified = "2026-07-17"
         ),
         SetupGuide(

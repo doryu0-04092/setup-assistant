@@ -1,6 +1,6 @@
 # setup-assistant
 
-開発環境(Claude Code/VSCode, ChatGPT, GitHub)のセットアップを支援するスマートフォンアプリ。
+開発環境(Cursor/Claude Code, ChatGPT, GitHub)のセットアップを支援するスマートフォンアプリ。
 
 学校の「サービス開発コンテスト」向けに開発中。スマホを個人のセキュアな金庫として使い、未設定PCに対して安全かつ素早く開発環境をセットアップできるようにすることを目指す。
 
