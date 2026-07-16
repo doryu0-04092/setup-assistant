@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.setupassistant.app.ui.SetupGuideScreen
+import com.setupassistant.app.ui.AppScaffold
 import com.setupassistant.app.ui.theme.SetupAssistantTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             SetupAssistantTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    SetupGuideScreen()
+                    AppScaffold()
                 }
             }
         }
