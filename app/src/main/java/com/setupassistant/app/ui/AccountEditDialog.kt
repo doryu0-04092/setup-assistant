@@ -2,6 +2,7 @@ package com.setupassistant.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,7 +26,7 @@ import com.setupassistant.app.data.AccountProfile
 import com.setupassistant.app.data.SecretRepository
 import com.setupassistant.app.data.TwoFactorMethod
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AccountEditDialog(
     profile: AccountProfile,
