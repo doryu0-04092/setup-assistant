@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -22,6 +24,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -84,12 +87,22 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = phase.summary, style = MaterialTheme.typography.bodyMedium)
                 Text(
                     text = "公式サイトで最終確認: ${phase.lastVerified}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                PhaseCompleteButton(
+                    stepCount = steps.size,
+                    doneCount = steps.count { checkedSteps.contains(it.id) },
+                    onToggle = { complete ->
+                        scope.launch {
+                            repository.setStepsChecked(steps.map { it.id }, complete)
+                        }
+                    }
                 )
             }
         }
@@ -142,6 +155,45 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
                 editingStep = null
             }
         )
+    }
+}
+
+/**
+ * フェーズをまとめて完了にする。
+ *
+ * すでに設定済みの環境では、1つずつチェックを付けるより
+ * フェーズごと完了にできた方が早い。
+ */
+@Composable
+private fun PhaseCompleteButton(
+    stepCount: Int,
+    doneCount: Int,
+    onToggle: (Boolean) -> Unit
+) {
+    // 分岐が未選択だと表示するステップがなく、完了にする対象もない
+    if (stepCount == 0) return
+
+    val allDone = doneCount == stepCount
+
+    if (allDone) {
+        OutlinedButton(
+            onClick = { onToggle(false) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text("完了済み — 取り消す")
+        }
+    } else {
+        Button(
+            onClick = { onToggle(true) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("このフェーズを完了にする ($doneCount / $stepCount)")
+        }
     }
 }
 
