@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "app/src/main/java/com/setupassistant/app/data/SetupGuide.kt"
+      - "app/src/main/java/com/setupassistant/app/data/SetupContent.kt"
       - ".github/workflows/link-check.yml"
   schedule:
     - cron: "0 0 * * 1"
@@ -14,15 +14,25 @@ jobs:
   check-urls:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Check official URLs are reachable
         run: |
-          # Keep this list in sync with SetupGuide.kt's officialUrl values
-          urls=(
-            "https://www.cursor.com/downloads"
-            "https://code.claude.com/docs/en/vscode"
-            "https://platform.openai.com/api-keys"
-            "https://docs.github.com/en/get-started/quickstart/set-up-git"
+          # URLs are read straight out of the content file so there is no
+          # second list to keep in sync. Only officialUrl values are checked —
+          # expectedOutput samples contain placeholder URLs that aren't real.
+          source_file="app/src/main/java/com/setupassistant/app/data/SetupContent.kt"
+          mapfile -t urls < <(
+            grep -oE 'officialUrl = "https://[^"]+"' "$source_file" \
+              | grep -oE 'https://[^"]+' | sort -u
           )
+
+          if [[ ${#urls[@]} -eq 0 ]]; then
+            echo "::error::No URLs found in $source_file — the extraction is probably broken"
+            exit 1
+          fi
+          echo "Found ${#urls[@]} URLs to check"
+
           # 401/403 are treated as non-fatal: many sites (e.g. Cloudflare-protected
           # pages) block plain curl requests as a bot even though the page is fine
           # for real users. Only 404/410 (gone) and 5xx (server error) fail the check.
