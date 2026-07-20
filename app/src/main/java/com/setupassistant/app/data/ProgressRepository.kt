@@ -23,9 +23,14 @@ class ProgressRepository(private val context: Context) {
         context.progressDataStore.data.map { it[checkedStepsKey] ?: emptySet() }
 
     suspend fun setStepChecked(stepId: String, checked: Boolean) {
+        setStepsChecked(listOf(stepId), checked)
+    }
+
+    /** フェーズをまとめて完了にする / 完了を取り消す */
+    suspend fun setStepsChecked(stepIds: List<String>, checked: Boolean) {
         context.progressDataStore.edit { prefs ->
             val current = prefs[checkedStepsKey] ?: emptySet()
-            prefs[checkedStepsKey] = if (checked) current + stepId else current - stepId
+            prefs[checkedStepsKey] = if (checked) current + stepIds else current - stepIds.toSet()
         }
     }
 
