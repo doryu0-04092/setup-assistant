@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Card
@@ -18,13 +20,17 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +42,9 @@ import com.setupassistant.app.data.ProgressRepository
 import com.setupassistant.app.data.SetupContent
 import com.setupassistant.app.data.SetupStep
 import com.setupassistant.app.data.StatusCheck
+import com.setupassistant.app.data.StepEdit
 import com.setupassistant.app.data.Surface
+import com.setupassistant.app.data.UserEditRepository
 import com.setupassistant.app.data.Verification
 import kotlinx.coroutines.launch
 
@@ -44,6 +52,7 @@ import kotlinx.coroutines.launch
 fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val repository = remember { ProgressRepository(context) }
+    val editRepository = remember { UserEditRepository(context) }
     val scope = rememberCoroutineScope()
     val phase = remember(phaseId) { SetupContent.findPhase(phaseId) }
 
@@ -57,6 +66,13 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
         .collectAsStateWithLifecycle(InstallState.UNKNOWN)
 
     val steps = phase.stepsFor(installState)
+
+    // 保存のたびに読み直すため、編集内容はバージョンを上げて再取得する
+    var editVersion by remember { mutableIntStateOf(0) }
+    val edits = remember(steps, editVersion) {
+        steps.associate { it.id to editRepository.get(it.id) }
+    }
+    var editingStep by remember { mutableStateOf<SetupStep?>(null) }
 
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
@@ -97,10 +113,30 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
         items(steps, key = { it.id }) { step ->
             StepCard(
                 step = step,
+                edit = edits[step.id] ?: StepEdit(),
                 checked = checkedSteps.contains(step.id),
-                onCheckedChange = { scope.launch { repository.setStepChecked(step.id, it) } }
+                onCheckedChange = { scope.launch { repository.setStepChecked(step.id, it) } },
+                onEditClick = { editingStep = step }
             )
         }
+    }
+
+    editingStep?.let { step ->
+        StepEditDialog(
+            step = step,
+            edit = edits[step.id] ?: StepEdit(),
+            onDismiss = { editingStep = null },
+            onSave = {
+                editRepository.save(step.id, it)
+                editVersion++
+                editingStep = null
+            },
+            onResetOverride = {
+                editRepository.clearOverride(step.id)
+                editVersion++
+                editingStep = null
+            }
+        )
     }
 }
 
@@ -151,8 +187,10 @@ private fun StatusCheckCard(
 @Composable
 private fun StepCard(
     step: SetupStep,
+    edit: StepEdit,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    onEditClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -168,14 +206,45 @@ private fun StepCard(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f)
                 )
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = if (edit.isEmpty) Icons.Default.EditNote else Icons.Default.Edit,
+                        contentDescription = "メモと手順の編集"
+                    )
+                }
             }
 
-            SurfaceLabel(step.surface)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SurfaceLabel(step.surface)
+                if (edit.hasOverride) {
+                    Text(
+                        text = "編集済み",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
 
-            Text(text = step.description, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = edit.description ?: step.description,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
-            step.command?.let {
+            (edit.command ?: step.command)?.let {
                 CommandBlock(command = it, expectedOutput = step.expectedOutput)
+            }
+
+            if (edit.note.isNotBlank()) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(text = "メモ", style = MaterialTheme.typography.labelMedium)
+                        Text(text = edit.note, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
             }
 
             step.verification?.let { VerificationBlock(it) }
