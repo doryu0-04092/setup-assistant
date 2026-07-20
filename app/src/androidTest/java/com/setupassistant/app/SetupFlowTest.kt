@@ -9,19 +9,26 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.setupassistant.app.data.AccountProfileRepository
+import com.setupassistant.app.data.ProgressRepository
+import com.setupassistant.app.data.UserEditRepository
 import com.setupassistant.app.ui.AppScaffold
+import com.setupassistant.app.ui.TAB_TAG_ACCOUNTS
+import com.setupassistant.app.ui.TAB_TAG_PRINCIPLES
+import com.setupassistant.app.ui.TAB_TAG_SETUP
 import com.setupassistant.app.ui.theme.SetupAssistantTheme
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 
 /**
  * 主要フローのE2Eテスト。
@@ -43,6 +50,12 @@ class SetupFlowTest {
                 AppScaffold()
             }
         }
+    }
+
+    @Test
+    fun 一覧が初期状態で表示される() {
+        composeRule.onNodeWithText("現場ルールの確認").assertIsDisplayed()
+        composeRule.onNodeWithText("0 / 4 完了").assertIsDisplayed()
     }
 
     @Test
@@ -109,13 +122,13 @@ class SetupFlowTest {
 
     @Test
     fun タブを移動できる() {
-        composeRule.onNodeWithText("アカウント").performClick()
+        composeRule.onNodeWithTag(TAB_TAG_ACCOUNTS).performClick()
         composeRule.onNodeWithText("まだ登録がありません").assertIsDisplayed()
 
-        composeRule.onNodeWithText("安全な進め方").performClick()
+        composeRule.onNodeWithTag(TAB_TAG_PRINCIPLES).performClick()
         composeRule.onNodeWithText("このアプリが保存するもの・しないもの").assertIsDisplayed()
 
-        composeRule.openSetupTab()
+        composeRule.onNodeWithTag(TAB_TAG_SETUP).performClick()
         composeRule.onNodeWithText("現場ルールの確認").assertIsDisplayed()
     }
 
@@ -123,7 +136,7 @@ class SetupFlowTest {
     fun 登録したメールアドレスがコマンドに差し込まれる() {
         val email = "onsite@example.com"
 
-        composeRule.onNodeWithText("アカウント").performClick()
+        composeRule.onNodeWithTag(TAB_TAG_ACCOUNTS).performClick()
         composeRule.onNodeWithContentDescription("アカウントを追加").performClick()
 
         composeRule.onNodeWithText("この登録の名前 (例: 常駐先A)").performTextInput("常駐先A")
@@ -133,7 +146,7 @@ class SetupFlowTest {
         composeRule.onNodeWithText("常駐先A").assertIsDisplayed()
 
         // Git設定のコマンドに実値が入ること
-        composeRule.openSetupTab()
+        composeRule.onNodeWithTag(TAB_TAG_SETUP).performClick()
         composeRule.openPhase("Git")
         composeRule.onNodeWithText("入っていない").performClick()
 
@@ -162,15 +175,15 @@ private fun ComposeContentTestRule.openPhase(title: String) {
     onNodeWithText(title).performClick()
 }
 
-/** タブとタイトルの両方に同じ文言が出るため、先頭のものを押す */
-private fun ComposeContentTestRule.openSetupTab() {
-    onAllNodesWithText("セットアップ").onFirst().performClick()
-}
-
-/** テスト間で進捗や登録内容が引き継がれないようにする */
+/**
+ * テスト間で進捗や登録内容が引き継がれないようにする。
+ *
+ * ファイルを消すだけでは SharedPreferences のメモリ上のキャッシュが残るため、
+ * リポジトリ経由で消す。
+ */
 private fun clearStoredState() {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
-    val dataDir = File(context.applicationInfo.dataDir)
-    File(dataDir, "files/datastore").deleteRecursively()
-    File(dataDir, "shared_prefs").deleteRecursively()
+    runBlocking { ProgressRepository(context).clearAll() }
+    AccountProfileRepository(context).clearAll()
+    UserEditRepository(context).clearAll()
 }

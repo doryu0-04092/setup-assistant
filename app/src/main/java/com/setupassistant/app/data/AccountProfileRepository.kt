@@ -56,6 +56,11 @@ class AccountProfileRepository(context: Context) {
         }
     }
 
+    /** 登録内容を全て消す。離任時のデータ消去とテストの初期化で使う */
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
     private fun writeAll(profiles: List<AccountProfile>) {
         prefs.edit().putString(KEY_PROFILES, AccountProfile.listToJson(profiles)).apply()
     }
