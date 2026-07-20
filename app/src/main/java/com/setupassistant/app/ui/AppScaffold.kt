@@ -3,6 +3,7 @@ package com.setupassistant.app.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +28,7 @@ import com.setupassistant.app.data.SetupContent
 
 private const val ROUTE_LIST = "phases"
 private const val ROUTE_DETAIL = "phases/{phaseId}"
+private const val ROUTE_ACCOUNTS = "accounts"
 private const val ROUTE_PRINCIPLES = "principles"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +45,7 @@ fun AppScaffold() {
             ?.let { SetupContent.findPhase(it)?.title }
             ?: "セットアップ"
 
+        route == ROUTE_ACCOUNTS -> "アカウント"
         route == ROUTE_PRINCIPLES -> "安全な進め方"
         else -> "セットアップ"
     }
@@ -72,6 +75,12 @@ fun AppScaffold() {
                     label = { Text("セットアップ") }
                 )
                 NavigationBarItem(
+                    selected = route == ROUTE_ACCOUNTS,
+                    onClick = { navController.switchTab(ROUTE_ACCOUNTS) },
+                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+                    label = { Text("アカウント") }
+                )
+                NavigationBarItem(
                     selected = route == ROUTE_PRINCIPLES,
                     onClick = { navController.switchTab(ROUTE_PRINCIPLES) },
                     icon = { Icon(Icons.Default.Shield, contentDescription = null) },
@@ -95,6 +104,9 @@ fun AppScaffold() {
                 arguments = listOf(navArgument("phaseId") { type = NavType.StringType })
             ) { entry ->
                 PhaseDetailScreen(phaseId = entry.arguments?.getString("phaseId").orEmpty())
+            }
+            composable(ROUTE_ACCOUNTS) {
+                AccountScreen()
             }
             composable(ROUTE_PRINCIPLES) {
                 PrinciplesScreen()

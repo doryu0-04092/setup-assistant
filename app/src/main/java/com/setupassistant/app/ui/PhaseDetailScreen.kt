@@ -37,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.setupassistant.app.data.AccountProfile
+import com.setupassistant.app.data.AccountProfileRepository
 import com.setupassistant.app.data.InstallState
 import com.setupassistant.app.data.ProgressRepository
 import com.setupassistant.app.data.SetupContent
@@ -46,6 +48,7 @@ import com.setupassistant.app.data.StepEdit
 import com.setupassistant.app.data.Surface
 import com.setupassistant.app.data.UserEditRepository
 import com.setupassistant.app.data.Verification
+import com.setupassistant.app.data.withAccountValues
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,6 +56,7 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val repository = remember { ProgressRepository(context) }
     val editRepository = remember { UserEditRepository(context) }
+    val activeProfile = remember { AccountProfileRepository(context).getActive() }
     val scope = rememberCoroutineScope()
     val phase = remember(phaseId) { SetupContent.findPhase(phaseId) }
 
@@ -114,6 +118,7 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
             StepCard(
                 step = step,
                 edit = edits[step.id] ?: StepEdit(),
+                activeProfile = activeProfile,
                 checked = checkedSteps.contains(step.id),
                 onCheckedChange = { scope.launch { repository.setStepChecked(step.id, it) } },
                 onEditClick = { editingStep = step }
@@ -188,6 +193,7 @@ private fun StatusCheckCard(
 private fun StepCard(
     step: SetupStep,
     edit: StepEdit,
+    activeProfile: AccountProfile?,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onEditClick: () -> Unit
@@ -231,7 +237,10 @@ private fun StepCard(
             )
 
             (edit.command ?: step.command)?.let {
-                CommandBlock(command = it, expectedOutput = step.expectedOutput)
+                CommandBlock(
+                    command = it.withAccountValues(activeProfile),
+                    expectedOutput = step.expectedOutput
+                )
             }
 
             if (edit.note.isNotBlank()) {

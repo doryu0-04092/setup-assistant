@@ -56,4 +56,7 @@ dependencies {
 
     // メモと手順の上書きは、うっかり秘密情報が書かれても平文で残らないよう暗号化する
     implementation("androidx.security:security-crypto:1.1.0")
+
+    // パスワードの参照時に生体認証・PINを求める
+    implementation("androidx.biometric:biometric:1.1.0")
 }
