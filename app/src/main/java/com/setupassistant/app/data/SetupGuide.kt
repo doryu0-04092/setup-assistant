@@ -40,7 +40,7 @@ object SetupGuides {
             steps = listOf(
                 "OpenAIアカウントを作成、またはログインする",
                 "APIキー管理画面で新しいキーを発行する(用途ごとに分けるのが安全)",
-                "発行されたキーは再表示できないため、その場でこのアプリのvaultに保存する",
+                "発行されたキーは再表示できないため、その場でPC側(環境変数や認証情報マネージャ)に設定する",
                 "必要に応じて使用量上限(Usage limits)を設定する"
             ),
             officialUrl = "https://platform.openai.com/api-keys",
