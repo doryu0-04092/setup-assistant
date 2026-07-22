@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -121,8 +122,17 @@ class SetupFlowTest {
     }
 
     @Test
-    fun 初期化で進捗が消える() {
+    fun 初期化で進捗とメモが消える() {
+        val note = "現場のプロキシ設定を確認すること"
+
         composeRule.onNodeWithText("現場ルールの確認").performClick()
+
+        // メモを1件書く
+        composeRule.onAllNodesWithContentDescription("メモと手順の編集").onFirst().performClick()
+        composeRule.onNodeWithText("メモ").performTextInput(note)
+        composeRule.onNodeWithText("保存").performClick()
+        composeRule.waitForText(note)
+
         composeRule.onNodeWithText("このフェーズを完了にする", substring = true).performClick()
         composeRule.waitForText("完了済み — 取り消す")
 
@@ -131,8 +141,11 @@ class SetupFlowTest {
 
         composeRule.onNodeWithContentDescription("セットアップを初期化").performClick()
         composeRule.onNodeWithText("初期化する").performClick()
-
         composeRule.waitForText("0 / 4 完了")
+
+        // メモも消えていること
+        composeRule.onNodeWithText("現場ルールの確認").performClick()
+        composeRule.onAllNodesWithText(note).assertCountEquals(0)
     }
 
     @Test
