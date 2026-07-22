@@ -37,11 +37,12 @@ jobs:
       - name: Build debug APK
         run: gradle assembleDebug
 
-      - name: Name the APK after the commit
+      # ファイル名は固定する。コミットごとに変えると古いAPKが並んで残り、
+      # どれを入れればいいのか分からなくなる
+      - name: Collect the APK
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk \
-             "dist/setup-assistant-dev-$(git rev-parse --short HEAD).apk"
+          cp app/build/outputs/apk/debug/app-debug.apk dist/setup-assistant-dev.apk
 
       - name: Publish to the rolling dev release
         uses: softprops/action-gh-release@v2
@@ -49,8 +50,7 @@ jobs:
           tag_name: dev
           name: 動作確認用ビルド (dev)
           prerelease: true
-          # 毎回貼り替えるので、古いAPKは残さない
-          files: dist/*.apk
+          files: dist/setup-assistant-dev.apk
           body: |
             master の最新コミットから自動でビルドしている動作確認用のAPK。
             正式なリリースではない。
