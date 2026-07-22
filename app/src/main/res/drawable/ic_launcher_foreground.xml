@@ -1,10 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  大文字の「SA」を少し傾けたロゴ。
+  文字はフォントに依存しないようパスで描いている。
+  Adaptive icon は端末によって円形などに切り抜かれるため、
+  中央の安全領域(18〜90)に収めている。
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,24 L74,44 L64,44 L64,74 L44,74 L44,44 L34,44 Z" />
+
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="-12">
+
+        <!-- S -->
+        <path
+            android:pathData="M48,43 C48,38 43,35.5 37.5,35.5 C31,35.5 26.5,38.5 26.5,43.5 C26.5,48.5 31.5,50.5 37.5,52.5 C43.5,54.5 48,56.5 48,61.5 C48,66.5 43.5,70 37,70 C31,70 26,67.5 26,62.5"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="7"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+
+        <!-- A -->
+        <path
+            android:pathData="M58,70 L69.5,35.5 L81,70 M62.5,58.5 L76.5,58.5"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="7"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
 </vector>

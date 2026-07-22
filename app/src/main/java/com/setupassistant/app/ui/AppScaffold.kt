@@ -154,13 +154,18 @@ fun AppScaffold() {
             title = { Text("セットアップを初期化しますか?") },
             text = {
                 Text(
-                    "チェックの状態と「入っていない / 入っている」の選択を消して、最初からやり直せるようにします。\n\n" +
-                        "自分で書いたメモと、書き換えた手順は消えません。"
+                    "次のものを全て消して、最初からやり直せるようにします。\n\n" +
+                        "・チェックの状態\n" +
+                        "・「入っていない / 入っている」の選択\n" +
+                        "・書いたメモ\n" +
+                        "・書き換えた手順\n\n" +
+                        "この操作は取り消せません。アカウントの登録内容は消えません。"
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { Repositories.progress(context).clearAll() }
+                    Repositories.userEdits(context).clearAll()
                     confirmingReset = false
                     navController.popBackStack(ROUTE_LIST, inclusive = false)
                 }) { Text("初期化する") }
