@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.SetupAssistant" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Compose が描き始める前の一瞬だけ使われる。背景色を合わせて明滅を防ぐ -->
+    <style name="Theme.SetupAssistant" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
 </resources>

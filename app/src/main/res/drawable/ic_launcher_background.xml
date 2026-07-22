@@ -4,7 +4,8 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- ブランド色。アプリ内の primary と揃えている -->
     <path
-        android:fillColor="#6650A4"
+        android:fillColor="#29487D"
         android:pathData="M0,0h108v108h-108z" />
 </vector>

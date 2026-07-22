@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ダークテーマ時に起動直後だけ白く光るのを防ぐ -->
+    <color name="window_background">#1A1B1F</color>
+</resources>
