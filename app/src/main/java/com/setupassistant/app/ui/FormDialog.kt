@@ -4,9 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -53,8 +54,10 @@ fun FormDialog(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .systemBarsPadding()
-                    .imePadding()
+                    // システムバーとキーボードの大きい方を採る。
+                    // systemBarsPadding と imePadding を重ねると余白が二重になり、
+                    // キーボードが出ているときに下端が欠ける
+                    .safeDrawingPadding()
             ) {
                 TopAppBar(
                     title = { Text(text = title, maxLines = 1) },
@@ -74,10 +77,16 @@ fun FormDialog(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    content = content
-                )
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    content()
+
+                    // 最後の入力欄でも、キーボードの上まで持ち上げられるだけの
+                    // スクロールの余地を残しておく
+                    Spacer(Modifier.height(160.dp))
+                }
             }
         }
     }

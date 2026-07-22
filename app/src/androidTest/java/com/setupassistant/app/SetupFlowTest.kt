@@ -169,6 +169,27 @@ class SetupFlowTest {
     }
 
     @Test
+    fun 入力中でも保存と全ての欄に手が届く() {
+        composeRule.onNodeWithTag(TAB_TAG_ACCOUNTS).performClick()
+        composeRule.onNodeWithContentDescription("アカウントを追加").performClick()
+
+        // 一番下の欄に入力してキーボードを出した状態にする
+        composeRule.scrollTo("変更する場合のみ入力")
+        composeRule.onNodeWithText("変更する場合のみ入力").performClick()
+        composeRule.onNodeWithText("変更する場合のみ入力").performTextInput("dummy")
+
+        // 保存は上部にあるため、キーボードが出ていても押せる
+        composeRule.onNodeWithText("保存").assertIsDisplayed()
+
+        // 下端の注意書きまでスクロールして読める
+        composeRule.scrollTo("APIキーやアクセストークンは", substring = true)
+
+        // 上の欄にも戻れる
+        composeRule.scrollTo("この登録の名前 (例: 常駐先A)")
+        composeRule.onNodeWithText("この登録の名前 (例: 常駐先A)").assertIsDisplayed()
+    }
+
+    @Test
     fun 登録したメールアドレスがコマンドに差し込まれる() {
         val email = "onsite@example.com"
 
