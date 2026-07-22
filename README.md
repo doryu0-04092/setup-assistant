@@ -15,6 +15,22 @@
 
 到達目標は二段階。まず **clone → 編集 → commit → push が通る**(実務環境の立ち上げ完了)、次に **AIとGitHubで自分で調べ・解決していける**(自己対処可能)状態にする。
 
+## ダウンロード
+
+**[最新版のAPKをダウンロード](https://github.com/doryu0-04092/setup-assistant/releases/latest)**
+
+### インストール手順
+
+1. 上のリンクをAndroid端末で開き、`app-release.apk` をダウンロードする
+2. ダウンロードしたファイルを開く
+3. 「提供元不明のアプリ」に関する確認が出たら、案内に従って設定画面で許可する
+   - Google Play 以外から入れるアプリは、既定では止められるため。ブラウザやファイルアプリごとに許可する形になっている
+4. 戻ってインストールし、起動する
+
+動作要件: **Android 8.0 以降**
+
+> Google Play では配布していないため、この手順でのインストールになる。
+
 ## 画面
 
 | タブ | 内容 |
@@ -27,15 +43,23 @@
 
 - [コンセプト](docs/concept.md) — 設計思想、機能構成、秘密情報の扱い、配布計画
 - [動作確認手順](docs/manual-test.md) — エミュレータ/実機での確認項目
+- [リリース手順](docs/release.md) — 署名鍵の準備とAPKの公開
 
 ## 開発
 
-- `android-build` CI が push ごとに `gradle assembleDebug` を実行する
-- `link-check` CI が手順内の公式URLを週次で確認する(URLは `SetupContent.kt` から自動抽出)
-- 実装は issue → ブランチ → PR で進める
+| CI | 内容 |
+|---|---|
+| `android-build` | push ごとに `gradle assembleDebug` を実行する |
+| `e2e-test` | エミュレータ上でCompose UI Testを実行し、実際の画面操作を検証する |
+| `link-check` | 手順内の公式URLを週次で確認する(URLは `SetupContent.kt` から自動抽出) |
+| `release` | `v*` のタグを打つと署名付きAPKをビルドして Releases に添付する |
+
+実装は issue → ブランチ → PR で進める。
+
+パスワードまわりは `BiometricPrompt` がシステムUIのためE2Eで検証できず、[動作確認手順](docs/manual-test.md) の手動確認で担保している。
 
 ## 現在のステータス
 
-主要機能の実装が完了。残るタスクは署名付きAPKのビルドと GitHub Releases での配布。
+主要機能の実装と配布の仕組みが完了。初回リリースには署名鍵の登録が必要([リリース手順](docs/release.md) を参照)。
 
 設計方針を現場前提に転換した経緯は [コンセプト](docs/concept.md) の「方針転換の記録」を参照。

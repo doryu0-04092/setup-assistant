@@ -13,6 +13,11 @@ Thumbs.db
 .env.*
 *.local
 
+# 署名鍵。漏れると誰でも同じ名前のアプリを署名できてしまう
+*.keystore
+*.jks
+keystore.properties
+
 # Logs
 *.log
 npm-debug.log*
