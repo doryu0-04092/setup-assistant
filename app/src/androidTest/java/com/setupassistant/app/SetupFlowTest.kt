@@ -121,6 +121,21 @@ class SetupFlowTest {
     }
 
     @Test
+    fun 初期化で進捗が消える() {
+        composeRule.onNodeWithText("現場ルールの確認").performClick()
+        composeRule.onNodeWithText("このフェーズを完了にする", substring = true).performClick()
+        composeRule.waitForText("完了済み — 取り消す")
+
+        composeRule.onNodeWithContentDescription("戻る").performClick()
+        composeRule.waitForText("4 / 4 完了")
+
+        composeRule.onNodeWithContentDescription("セットアップを初期化").performClick()
+        composeRule.onNodeWithText("初期化する").performClick()
+
+        composeRule.waitForText("0 / 4 完了")
+    }
+
+    @Test
     fun 分岐未選択のフェーズには一括完了ボタンを出さない() {
         composeRule.openPhase("Git")
 
