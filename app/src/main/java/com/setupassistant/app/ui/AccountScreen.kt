@@ -39,13 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.setupassistant.app.data.AccountProfile
 import com.setupassistant.app.data.AccountProfileRepository
+import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.data.SecretRepository
 
 @Composable
 fun AccountScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val repository = remember { AccountProfileRepository(context) }
-    val secrets = remember { SecretRepository(context) }
+    val repository = remember { Repositories.accountProfiles(context) }
+    val secrets = remember { Repositories.secrets(context) }
 
     var version by remember { mutableIntStateOf(0) }
     val profiles = remember(version) { repository.getAll() }

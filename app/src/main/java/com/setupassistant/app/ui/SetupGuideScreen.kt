@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.setupassistant.app.data.InstallState
-import com.setupassistant.app.data.ProgressRepository
+import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.data.SetupContent
 import com.setupassistant.app.data.SetupPhase
 
@@ -35,7 +35,7 @@ fun SetupGuideScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val repository = remember { ProgressRepository(context) }
+    val repository = remember { Repositories.progress(context) }
 
     val checkedSteps by repository.checkedSteps.collectAsStateWithLifecycle(emptySet())
     val installStates by repository.allInstallStates.collectAsStateWithLifecycle(emptyMap())
