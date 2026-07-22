@@ -107,16 +107,17 @@ class SetupFlowTest {
         composeRule.onNodeWithText("現場ルールの確認").performClick()
 
         composeRule.onNodeWithText("このフェーズを完了にする", substring = true).performClick()
-        composeRule.onNodeWithText("完了済み — 取り消す").assertIsDisplayed()
+        composeRule.waitForText("完了済み — 取り消す")
 
         // 一覧にも反映される
         composeRule.onNodeWithContentDescription("戻る").performClick()
+        composeRule.waitForText("4 / 4 完了")
         composeRule.onNodeWithText("4 / 4 完了").assertIsDisplayed()
 
         // 取り消せる
         composeRule.onNodeWithText("現場ルールの確認").performClick()
         composeRule.onNodeWithText("完了済み — 取り消す").performClick()
-        composeRule.onNodeWithText("このフェーズを完了にする", substring = true).assertIsDisplayed()
+        composeRule.waitForText("このフェーズを完了にする", substring = true)
     }
 
     @Test
@@ -158,7 +159,9 @@ class SetupFlowTest {
         composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
-        composeRule.waitForText(email, substring = true)
+        // 分岐が反映されるまでは、先頭付近の手順の有無で判断する。
+        // LazyColumn は画面外の項目を生成しないため、末尾の手順は待っても現れない
+        composeRule.waitForText("Gitをインストールする")
         composeRule.scrollTo(email, substring = true)
         composeRule.onAllNodesWithText(email, substring = true).onFirst().assertIsDisplayed()
     }
@@ -169,7 +172,7 @@ class SetupFlowTest {
         composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
-        composeRule.waitForText("<登録したメールアドレス>", substring = true)
+        composeRule.waitForText("Gitをインストールする")
         composeRule.scrollTo("<登録したメールアドレス>", substring = true)
         composeRule.onAllNodesWithText("<登録したメールアドレス>", substring = true)
             .onFirst()
