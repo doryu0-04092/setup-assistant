@@ -84,13 +84,18 @@ class SetupFlowTest {
         composeRule.openPhase("Git")
 
         // 選ぶまではどちらの手順も出さない
+        composeRule.scrollTo("上の確認結果を選ぶと、あなたに必要な手順だけが表示されます。")
         composeRule.onNodeWithText("上の確認結果を選ぶと、あなたに必要な手順だけが表示されます。")
             .assertIsDisplayed()
 
+        composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
+        composeRule.scrollTo("Gitをインストールする")
         composeRule.onNodeWithText("Gitをインストールする").assertIsDisplayed()
 
+        composeRule.scrollTo("入っている")
         composeRule.onNodeWithText("入っている").performClick()
+        composeRule.scrollTo("今の設定を確認する")
         composeRule.onNodeWithText("今の設定を確認する").assertIsDisplayed()
         composeRule.onAllNodesWithText("Gitをインストールする").assertCountEquals(0)
     }
@@ -148,6 +153,7 @@ class SetupFlowTest {
         // Git設定のコマンドに実値が入ること
         composeRule.onNodeWithTag(TAB_TAG_SETUP).performClick()
         composeRule.openPhase("Git")
+        composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
         composeRule.scrollTo(email, substring = true)
@@ -157,6 +163,7 @@ class SetupFlowTest {
     @Test
     fun メールアドレス未登録なら何を入れるべきか示す() {
         composeRule.openPhase("Git")
+        composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
         composeRule.scrollTo("<登録したメールアドレス>", substring = true)
