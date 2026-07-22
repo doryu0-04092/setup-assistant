@@ -4,9 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,9 +21,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+
+/** フォーム内のスクロール領域。背面の一覧と区別してテストから指定するために使う */
+const val FORM_SCROLL_TAG = "form_scroll"
 
 /**
  * 入力フォーム用の全画面ダイアログ。
@@ -31,7 +36,7 @@ import androidx.compose.ui.window.DialogProperties
  * 下部に置くとどうしても隠れて押せなくなる。上部なら常に見えている。
  *
  * decorFitsSystemWindows を false にしているのは、既定のままだと
- * キーボードの高さが imePadding に伝わらず、余白が付かないため。
+ * キーボードの高さが余白の計算に伝わらないため。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,8 +58,10 @@ fun FormDialog(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .systemBarsPadding()
-                    .imePadding()
+                    // システムバーとキーボードの大きい方を採る。
+                    // systemBarsPadding と imePadding を重ねると余白が二重になり、
+                    // キーボードが出ているときに下端が欠ける
+                    .safeDrawingPadding()
             ) {
                 TopAppBar(
                     title = { Text(text = title, maxLines = 1) },
@@ -73,11 +80,18 @@ fun FormDialog(
                 Column(
                     modifier = Modifier
                         .weight(1f)
+                        .testTag(FORM_SCROLL_TAG)
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    content = content
-                )
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    content()
+
+                    // 最後の入力欄でも、キーボードの上まで持ち上げられるだけの
+                    // スクロールの余地を残しておく
+                    Spacer(Modifier.height(160.dp))
+                }
             }
         }
     }

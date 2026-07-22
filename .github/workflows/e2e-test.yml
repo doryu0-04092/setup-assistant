@@ -45,7 +45,12 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: gradle connectedDebugAndroidTest
+          # エミュレータはハードウェアキーボードがある扱いになり、既定では
+          # ソフトウェアキーボードが出ない。入力欄がキーボードに隠れないことを
+          # 確かめたいので、強制的に出るようにしている
+          script: |
+            adb shell settings put secure show_ime_with_hard_keyboard 1
+            gradle connectedDebugAndroidTest
 
       - name: Upload test report
         if: always()

@@ -19,6 +19,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.ui.AppScaffold
+import com.setupassistant.app.ui.FORM_SCROLL_TAG
 import com.setupassistant.app.ui.TAB_TAG_ACCOUNTS
 import com.setupassistant.app.ui.TAB_TAG_PRINCIPLES
 import com.setupassistant.app.ui.TAB_TAG_SETUP
@@ -169,6 +170,27 @@ class SetupFlowTest {
     }
 
     @Test
+    fun 入力中でも保存と全ての欄に手が届く() {
+        composeRule.onNodeWithTag(TAB_TAG_ACCOUNTS).performClick()
+        composeRule.onNodeWithContentDescription("アカウントを追加").performClick()
+
+        // 一番下の欄に入力してキーボードを出した状態にする
+        composeRule.scrollFormTo("変更する場合のみ入力")
+        composeRule.onNodeWithText("変更する場合のみ入力").performClick()
+        composeRule.onNodeWithText("変更する場合のみ入力").performTextInput("dummy")
+
+        // 保存は上部にあるため、キーボードが出ていても押せる
+        composeRule.onNodeWithText("保存").assertIsDisplayed()
+
+        // 下端の注意書きまでスクロールして読める
+        composeRule.scrollFormTo("APIキーやアクセストークンは", substring = true)
+
+        // 上の欄にも戻れる
+        composeRule.scrollFormTo("この登録の名前 (例: 常駐先A)")
+        composeRule.onNodeWithText("この登録の名前 (例: 常駐先A)").assertIsDisplayed()
+    }
+
+    @Test
     fun 登録したメールアドレスがコマンドに差し込まれる() {
         val email = "onsite@example.com"
 
@@ -210,6 +232,11 @@ class SetupFlowTest {
 
 private fun ComposeContentTestRule.scrollTo(text: String, substring: Boolean = false) {
     onNode(hasScrollAction()).performScrollToNode(hasText(text, substring = substring))
+}
+
+/** フォームを開くと背面の一覧もスクロール可能なまま残るため、対象を指定する */
+private fun ComposeContentTestRule.scrollFormTo(text: String, substring: Boolean = false) {
+    onNodeWithTag(FORM_SCROLL_TAG).performScrollToNode(hasText(text, substring = substring))
 }
 
 /**
