@@ -179,7 +179,13 @@ class SetupFlowTest {
         composeRule.onNodeWithText("変更する場合のみ入力").performClick()
         composeRule.onNodeWithText("変更する場合のみ入力").performTextInput("dummy")
 
-        // 保存は上部にあるため、キーボードが出ていても押せる
+        // 保存は上部にあるため、キーボードが出ていても押せる。
+        // キーボードの出現はアニメーションを伴うので、収まるまで待つ
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodesWithText("保存")
+                .fetchSemanticsNodes()
+                .any { it.layoutInfo.isPlaced }
+        }
         composeRule.onNodeWithText("保存").assertIsDisplayed()
 
         // 下端の注意書きまでスクロールして読める
