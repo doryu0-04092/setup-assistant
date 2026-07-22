@@ -16,9 +16,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.setupassistant.app.data.AccountProfileRepository
-import com.setupassistant.app.data.ProgressRepository
-import com.setupassistant.app.data.UserEditRepository
+import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.ui.AppScaffold
 import com.setupassistant.app.ui.TAB_TAG_ACCOUNTS
 import com.setupassistant.app.ui.TAB_TAG_PRINCIPLES
@@ -191,8 +189,9 @@ private fun clearStoredState() {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     val context = instrumentation.targetContext
     instrumentation.runOnMainSync {
-        runBlocking { ProgressRepository(context).clearAll() }
-        AccountProfileRepository(context).clearAll()
-        UserEditRepository(context).clearAll()
+        // アプリが使うのと同じインスタンスを消す。別に作ると消し漏れが起きる
+        runBlocking { Repositories.progress(context).clearAll() }
+        Repositories.accountProfiles(context).clearAll()
+        Repositories.userEdits(context).clearAll()
     }
 }
