@@ -90,11 +90,13 @@ class SetupFlowTest {
 
         composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
+        composeRule.waitForText("Gitをインストールする")
         composeRule.scrollTo("Gitをインストールする")
         composeRule.onNodeWithText("Gitをインストールする").assertIsDisplayed()
 
         composeRule.scrollTo("入っている")
         composeRule.onNodeWithText("入っている").performClick()
+        composeRule.waitForText("今の設定を確認する")
         composeRule.scrollTo("今の設定を確認する")
         composeRule.onNodeWithText("今の設定を確認する").assertIsDisplayed()
         composeRule.onAllNodesWithText("Gitをインストールする").assertCountEquals(0)
@@ -156,6 +158,7 @@ class SetupFlowTest {
         composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
+        composeRule.waitForText(email, substring = true)
         composeRule.scrollTo(email, substring = true)
         composeRule.onAllNodesWithText(email, substring = true).onFirst().assertIsDisplayed()
     }
@@ -166,6 +169,7 @@ class SetupFlowTest {
         composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
+        composeRule.waitForText("<登録したメールアドレス>", substring = true)
         composeRule.scrollTo("<登録したメールアドレス>", substring = true)
         composeRule.onAllNodesWithText("<登録したメールアドレス>", substring = true)
             .onFirst()
@@ -175,6 +179,16 @@ class SetupFlowTest {
 
 private fun ComposeContentTestRule.scrollTo(text: String, substring: Boolean = false) {
     onNode(hasScrollAction()).performScrollToNode(hasText(text, substring = substring))
+}
+
+/**
+ * 分岐の選択は DataStore への書き込みを経て反映されるため、
+ * 画面に出るまで待つ。待たずに検証すると保存の完了前に失敗しうる。
+ */
+private fun ComposeContentTestRule.waitForText(text: String, substring: Boolean = false) {
+    waitUntil(timeoutMillis = 5_000) {
+        onAllNodes(hasText(text, substring = substring)).fetchSemanticsNodes().isNotEmpty()
+    }
 }
 
 private fun ComposeContentTestRule.openPhase(title: String) {
