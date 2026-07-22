@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.setupassistant.app.ui.theme.Spacing
 import com.setupassistant.app.data.InstallState
 import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.data.SetupContent
@@ -42,8 +43,8 @@ fun SetupGuideScreen(
 
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(Spacing.Large),
+        verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
     ) {
         item {
             Text(
@@ -83,15 +84,15 @@ private fun PhaseCard(
             .clickable(onClick = onClick)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(Spacing.Large),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Small)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "$index",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 12.dp)
+                    modifier = Modifier.padding(end = Spacing.Medium)
                 )
                 Text(
                     text = phase.title,

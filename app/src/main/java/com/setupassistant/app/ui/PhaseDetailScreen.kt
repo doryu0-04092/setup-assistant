@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,7 @@ import com.setupassistant.app.data.StepEdit
 import com.setupassistant.app.data.Surface
 import com.setupassistant.app.data.Verification
 import com.setupassistant.app.data.withAccountValues
+import com.setupassistant.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,11 +87,11 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
 
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(Spacing.Large),
+        verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
                 Text(text = phase.summary, style = MaterialTheme.typography.bodyMedium)
                 Text(
                     text = "公式サイトで最終確認: ${phase.lastVerified}",
@@ -211,15 +213,11 @@ private fun StatusCheckCard(
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(Spacing.Large),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Small)
         ) {
             Text(text = "まず確認", style = MaterialTheme.typography.labelMedium)
-            Text(
-                text = check.question,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = check.question, style = MaterialTheme.typography.titleMedium)
             SurfaceLabel(check.surface)
             Text(text = check.howToCheck, style = MaterialTheme.typography.bodyMedium)
 
@@ -227,7 +225,7 @@ private fun StatusCheckCard(
                 CommandBlock(command = it, expectedOutput = check.expectedIfPresent)
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small)) {
                 FilterChip(
                     selected = selected == InstallState.ABSENT,
                     onClick = { onSelect(InstallState.ABSENT) },
@@ -256,31 +254,31 @@ private fun StepCard(
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(Spacing.Large),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = checked, onCheckedChange = onCheckedChange)
-                Text(
-                    text = step.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.Tight)
+                ) {
+                    Text(text = step.title, style = MaterialTheme.typography.titleMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small)) {
+                        SurfaceLabel(step.surface)
+                        if (edit.hasOverride) {
+                            Text(
+                                text = "編集済み",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                }
                 IconButton(onClick = onEditClick) {
                     Icon(
                         imageVector = if (edit.isEmpty) Icons.Default.EditNote else Icons.Default.Edit,
                         contentDescription = "メモと手順の編集"
-                    )
-                }
-            }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SurfaceLabel(step.surface)
-                if (edit.hasOverride) {
-                    Text(
-                        text = "編集済み",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -297,33 +295,35 @@ private fun StepCard(
                 )
             }
 
-            if (edit.note.isNotBlank()) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(text = "メモ", style = MaterialTheme.typography.labelMedium)
-                        Text(text = edit.note, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            }
-
             step.verification?.let { VerificationBlock(it) }
 
             step.pitfall?.let {
-                Text(
-                    text = "⚠ $it",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
+                NoticeBlock(
+                    label = "詰まったら",
+                    container = MaterialTheme.colorScheme.errorContainer,
+                    onContainer = MaterialTheme.colorScheme.onErrorContainer
+                ) {
+                    Text(text = it, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+
+            if (edit.note.isNotBlank()) {
+                NoticeBlock(
+                    label = "メモ",
+                    container = MaterialTheme.colorScheme.tertiaryContainer,
+                    onContainer = MaterialTheme.colorScheme.onTertiaryContainer
+                ) {
+                    Text(text = edit.note, style = MaterialTheme.typography.bodySmall)
+                }
             }
 
             step.officialUrl?.let { url ->
-                TextButton(onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                }) {
+                TextButton(
+                    onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    },
+                    contentPadding = PaddingValues(0.dp)
+                ) {
                     Text("公式サイトを開く")
                 }
             }
@@ -331,23 +331,52 @@ private fun StepCard(
     }
 }
 
+/**
+ * 本文とは別の性質の情報を、背景を敷いて見分けられるようにする。
+ * 説明・コマンド・確認方法・詰まりポイントが同じ見た目で並ぶと、
+ * どれが何なのか読み取れないため。
+ */
+@Composable
+private fun NoticeBlock(
+    label: String,
+    container: Color,
+    onContainer: Color,
+    content: @Composable () -> Unit
+) {
+    androidx.compose.material3.Surface(
+        color = container,
+        contentColor = onContainer,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(Spacing.Medium),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Tight)
+        ) {
+            Text(text = label, style = MaterialTheme.typography.labelMedium)
+            content()
+        }
+    }
+}
+
 @Composable
 private fun VerificationBlock(verification: Verification) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = "できたかどうかの確認",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(text = verification.how, style = MaterialTheme.typography.bodySmall)
+    NoticeBlock(
+        label = "できたかどうかの確認",
+        container = MaterialTheme.colorScheme.primaryContainer,
+        onContainer = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
+            Text(text = verification.how, style = MaterialTheme.typography.bodySmall)
 
-        verification.command?.let { CommandBlock(command = it) }
+            verification.command?.let { CommandBlock(command = it) }
 
-        Text(
-            text = "✓ ${verification.expected}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary
-        )
+            Text(
+                text = "✓ ${verification.expected}",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

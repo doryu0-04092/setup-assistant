@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.setupassistant.app.ui.theme.Spacing
 
 private data class DataPolicy(
     val kind: String,
@@ -63,11 +64,11 @@ private val cleanupItems = listOf(
 fun PrinciplesScreen(modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(Spacing.Large),
+        verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
                 Text(
                     text = "このアプリが保存するもの・しないもの",
                     style = MaterialTheme.typography.titleMedium,
@@ -92,8 +93,8 @@ fun PrinciplesScreen(modifier: Modifier = Modifier) {
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.padding(Spacing.Large),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.Small)
                 ) {
                     Text(
                         text = "なぜトークンを端末に置かないのか",
@@ -116,7 +117,7 @@ fun PrinciplesScreen(modifier: Modifier = Modifier) {
         }
 
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
                 Text(
                     text = "現場のPCを離れるときに消すもの",
                     style = MaterialTheme.typography.titleMedium,
@@ -134,7 +135,7 @@ fun PrinciplesScreen(modifier: Modifier = Modifier) {
         items(cleanupItems.size) { index ->
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(Spacing.Small)
             ) {
                 Text(text = "・", style = MaterialTheme.typography.bodyMedium)
                 Text(text = cleanupItems[index], style = MaterialTheme.typography.bodyMedium)
@@ -147,10 +148,10 @@ fun PrinciplesScreen(modifier: Modifier = Modifier) {
 private fun PolicyCard(policy: DataPolicy) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.padding(Spacing.Large),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Tight)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small)) {
                 Text(
                     text = policy.kind,
                     style = MaterialTheme.typography.titleSmall,
