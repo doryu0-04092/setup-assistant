@@ -55,7 +55,9 @@ class SetupFlowTest {
     @Test
     fun 一覧が初期状態で表示される() {
         composeRule.onNodeWithText("現場ルールの確認").assertIsDisplayed()
-        composeRule.onNodeWithText("0 / 4 完了").assertIsDisplayed()
+
+        // 同じ進捗表示が複数のフェーズに出るため、先頭のものを見る
+        composeRule.onAllNodesWithText("0 / 4 完了").onFirst().assertIsDisplayed()
     }
 
     @Test
@@ -180,10 +182,17 @@ private fun ComposeContentTestRule.openPhase(title: String) {
  *
  * ファイルを消すだけでは SharedPreferences のメモリ上のキャッシュが残るため、
  * リポジトリ経由で消す。
+ *
+ * メインスレッドで行うのは、DataStore の書き込みが前のテストの
+ * まだ生きているコンポジションに流れ込み、バックグラウンドスレッドから
+ * Viewに触れて落ちるのを避けるため。
  */
 private fun clearStoredState() {
-    val context = InstrumentationRegistry.getInstrumentation().targetContext
-    runBlocking { ProgressRepository(context).clearAll() }
-    AccountProfileRepository(context).clearAll()
-    UserEditRepository(context).clearAll()
+    val instrumentation = InstrumentationRegistry.getInstrumentation()
+    val context = instrumentation.targetContext
+    instrumentation.runOnMainSync {
+        runBlocking { ProgressRepository(context).clearAll() }
+        AccountProfileRepository(context).clearAll()
+        UserEditRepository(context).clearAll()
+    }
 }
