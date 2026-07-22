@@ -21,9 +21,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+
+/** フォーム内のスクロール領域。背面の一覧と区別してテストから指定するために使う */
+const val FORM_SCROLL_TAG = "form_scroll"
 
 /**
  * 入力フォーム用の全画面ダイアログ。
@@ -32,7 +36,7 @@ import androidx.compose.ui.window.DialogProperties
  * 下部に置くとどうしても隠れて押せなくなる。上部なら常に見えている。
  *
  * decorFitsSystemWindows を false にしているのは、既定のままだと
- * キーボードの高さが imePadding に伝わらず、余白が付かないため。
+ * キーボードの高さが余白の計算に伝わらないため。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +80,7 @@ fun FormDialog(
                 Column(
                     modifier = Modifier
                         .weight(1f)
+                        .testTag(FORM_SCROLL_TAG)
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 24.dp)
                         .padding(top = 8.dp),
