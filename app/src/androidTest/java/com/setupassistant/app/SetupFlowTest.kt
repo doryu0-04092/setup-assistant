@@ -16,9 +16,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.setupassistant.app.data.AccountProfileRepository
-import com.setupassistant.app.data.ProgressRepository
-import com.setupassistant.app.data.UserEditRepository
+import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.ui.AppScaffold
 import com.setupassistant.app.ui.TAB_TAG_ACCOUNTS
 import com.setupassistant.app.ui.TAB_TAG_PRINCIPLES
@@ -86,13 +84,20 @@ class SetupFlowTest {
         composeRule.openPhase("Git")
 
         // 選ぶまではどちらの手順も出さない
+        composeRule.scrollTo("上の確認結果を選ぶと、あなたに必要な手順だけが表示されます。")
         composeRule.onNodeWithText("上の確認結果を選ぶと、あなたに必要な手順だけが表示されます。")
             .assertIsDisplayed()
 
+        composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
+        composeRule.waitForText("Gitをインストールする")
+        composeRule.scrollTo("Gitをインストールする")
         composeRule.onNodeWithText("Gitをインストールする").assertIsDisplayed()
 
+        composeRule.scrollTo("入っている")
         composeRule.onNodeWithText("入っている").performClick()
+        composeRule.waitForText("今の設定を確認する")
+        composeRule.scrollTo("今の設定を確認する")
         composeRule.onNodeWithText("今の設定を確認する").assertIsDisplayed()
         composeRule.onAllNodesWithText("Gitをインストールする").assertCountEquals(0)
     }
@@ -102,16 +107,17 @@ class SetupFlowTest {
         composeRule.onNodeWithText("現場ルールの確認").performClick()
 
         composeRule.onNodeWithText("このフェーズを完了にする", substring = true).performClick()
-        composeRule.onNodeWithText("完了済み — 取り消す").assertIsDisplayed()
+        composeRule.waitForText("完了済み — 取り消す")
 
         // 一覧にも反映される
         composeRule.onNodeWithContentDescription("戻る").performClick()
+        composeRule.waitForText("4 / 4 完了")
         composeRule.onNodeWithText("4 / 4 完了").assertIsDisplayed()
 
         // 取り消せる
         composeRule.onNodeWithText("現場ルールの確認").performClick()
         composeRule.onNodeWithText("完了済み — 取り消す").performClick()
-        composeRule.onNodeWithText("このフェーズを完了にする", substring = true).assertIsDisplayed()
+        composeRule.waitForText("このフェーズを完了にする", substring = true)
     }
 
     @Test
@@ -150,8 +156,12 @@ class SetupFlowTest {
         // Git設定のコマンドに実値が入ること
         composeRule.onNodeWithTag(TAB_TAG_SETUP).performClick()
         composeRule.openPhase("Git")
+        composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
+        // 分岐が反映されるまでは、先頭付近の手順の有無で判断する。
+        // LazyColumn は画面外の項目を生成しないため、末尾の手順は待っても現れない
+        composeRule.waitForText("Gitをインストールする")
         composeRule.scrollTo(email, substring = true)
         composeRule.onAllNodesWithText(email, substring = true).onFirst().assertIsDisplayed()
     }
@@ -159,8 +169,10 @@ class SetupFlowTest {
     @Test
     fun メールアドレス未登録なら何を入れるべきか示す() {
         composeRule.openPhase("Git")
+        composeRule.scrollTo("入っていない")
         composeRule.onNodeWithText("入っていない").performClick()
 
+        composeRule.waitForText("Gitをインストールする")
         composeRule.scrollTo("<登録したメールアドレス>", substring = true)
         composeRule.onAllNodesWithText("<登録したメールアドレス>", substring = true)
             .onFirst()
@@ -170,6 +182,16 @@ class SetupFlowTest {
 
 private fun ComposeContentTestRule.scrollTo(text: String, substring: Boolean = false) {
     onNode(hasScrollAction()).performScrollToNode(hasText(text, substring = substring))
+}
+
+/**
+ * 分岐の選択は DataStore への書き込みを経て反映されるため、
+ * 画面に出るまで待つ。待たずに検証すると保存の完了前に失敗しうる。
+ */
+private fun ComposeContentTestRule.waitForText(text: String, substring: Boolean = false) {
+    waitUntil(timeoutMillis = 5_000) {
+        onAllNodes(hasText(text, substring = substring)).fetchSemanticsNodes().isNotEmpty()
+    }
 }
 
 private fun ComposeContentTestRule.openPhase(title: String) {
@@ -191,8 +213,9 @@ private fun clearStoredState() {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     val context = instrumentation.targetContext
     instrumentation.runOnMainSync {
-        runBlocking { ProgressRepository(context).clearAll() }
-        AccountProfileRepository(context).clearAll()
-        UserEditRepository(context).clearAll()
+        // アプリが使うのと同じインスタンスを消す。別に作ると消し漏れが起きる
+        runBlocking { Repositories.progress(context).clearAll() }
+        Repositories.accountProfiles(context).clearAll()
+        Repositories.userEdits(context).clearAll()
     }
 }

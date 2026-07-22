@@ -41,15 +41,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.setupassistant.app.data.AccountProfile
-import com.setupassistant.app.data.AccountProfileRepository
 import com.setupassistant.app.data.InstallState
-import com.setupassistant.app.data.ProgressRepository
+import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.data.SetupContent
 import com.setupassistant.app.data.SetupStep
 import com.setupassistant.app.data.StatusCheck
 import com.setupassistant.app.data.StepEdit
 import com.setupassistant.app.data.Surface
-import com.setupassistant.app.data.UserEditRepository
 import com.setupassistant.app.data.Verification
 import com.setupassistant.app.data.withAccountValues
 import kotlinx.coroutines.launch
@@ -57,11 +55,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val repository = remember { ProgressRepository(context) }
-    val editRepository = remember { UserEditRepository(context) }
+    val progressRepository = remember { Repositories.progress(context) }
+    val editRepository = remember { Repositories.userEdits(context) }
+    val profileRepository = remember { Repositories.accountProfiles(context) }
+
     // 参照のたびに読み直す。remember に包むと、後からアカウントを登録・切り替えしても
     // 開いたことのある画面が古い値のままになる
-    val profileRepository = remember { AccountProfileRepository(context) }
     val activeProfile = profileRepository.getActive()
     val scope = rememberCoroutineScope()
     val phase = remember(phaseId) { SetupContent.findPhase(phaseId) }
@@ -71,8 +70,8 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
         return
     }
 
-    val checkedSteps by repository.checkedSteps.collectAsStateWithLifecycle(emptySet())
-    val installState by repository.installState(phaseId)
+    val checkedSteps by progressRepository.checkedSteps.collectAsStateWithLifecycle(emptySet())
+    val installState by progressRepository.installState(phaseId)
         .collectAsStateWithLifecycle(InstallState.UNKNOWN)
 
     val steps = phase.stepsFor(installState)
@@ -103,7 +102,7 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
                     doneCount = steps.count { checkedSteps.contains(it.id) },
                     onToggle = { complete ->
                         scope.launch {
-                            repository.setStepsChecked(steps.map { it.id }, complete)
+                            progressRepository.setStepsChecked(steps.map { it.id }, complete)
                         }
                     }
                 )
@@ -115,7 +114,7 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
                 StatusCheckCard(
                     check = check,
                     selected = installState,
-                    onSelect = { scope.launch { repository.setInstallState(phaseId, it) } }
+                    onSelect = { scope.launch { progressRepository.setInstallState(phaseId, it) } }
                 )
             }
         }
@@ -136,7 +135,7 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
                 edit = edits[step.id] ?: StepEdit(),
                 activeProfile = activeProfile,
                 checked = checkedSteps.contains(step.id),
-                onCheckedChange = { scope.launch { repository.setStepChecked(step.id, it) } },
+                onCheckedChange = { scope.launch { progressRepository.setStepChecked(step.id, it) } },
                 onEditClick = { editingStep = step }
             )
         }
