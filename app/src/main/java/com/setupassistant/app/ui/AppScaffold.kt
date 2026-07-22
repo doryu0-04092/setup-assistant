@@ -5,7 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -13,10 +15,16 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -25,7 +33,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.setupassistant.app.data.Repositories
 import com.setupassistant.app.data.SetupContent
+import kotlinx.coroutines.launch
 
 private const val ROUTE_LIST = "phases"
 private const val ROUTE_DETAIL = "phases/{phaseId}"
@@ -39,11 +49,16 @@ const val TAB_TAG_PRINCIPLES = "tab_principles"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScaffold() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
 
     val route = backStackEntry?.destination?.route
     val isDetail = route == ROUTE_DETAIL
+    val isSetupTab = route == ROUTE_LIST || isDetail
+
+    var confirmingReset by remember { mutableStateOf(false) }
 
     val title = when {
         isDetail -> backStackEntry?.arguments?.getString("phaseId")
@@ -65,6 +80,16 @@ fun AppScaffold() {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "戻る"
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    if (isSetupTab) {
+                        IconButton(onClick = { confirmingReset = true }) {
+                            Icon(
+                                imageVector = Icons.Default.RestartAlt,
+                                contentDescription = "セットアップを初期化"
                             )
                         }
                     }
@@ -121,6 +146,29 @@ fun AppScaffold() {
                 PrinciplesScreen()
             }
         }
+    }
+
+    if (confirmingReset) {
+        AlertDialog(
+            onDismissRequest = { confirmingReset = false },
+            title = { Text("セットアップを初期化しますか?") },
+            text = {
+                Text(
+                    "チェックの状態と「入っていない / 入っている」の選択を消して、最初からやり直せるようにします。\n\n" +
+                        "自分で書いたメモと、書き換えた手順は消えません。"
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch { Repositories.progress(context).clearAll() }
+                    confirmingReset = false
+                    navController.popBackStack(ROUTE_LIST, inclusive = false)
+                }) { Text("初期化する") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingReset = false }) { Text("キャンセル") }
+            }
+        )
     }
 }
 
