@@ -34,6 +34,11 @@ class ProgressRepository(private val context: Context) {
         }
     }
 
+    /** 進捗を全て消す。離任時のデータ消去とテストの初期化で使う */
+    suspend fun clearAll() {
+        context.progressDataStore.edit { it.clear() }
+    }
+
     fun installState(phaseId: String): Flow<InstallState> =
         context.progressDataStore.data.map { prefs -> prefs.readInstallState(phaseId) }
 

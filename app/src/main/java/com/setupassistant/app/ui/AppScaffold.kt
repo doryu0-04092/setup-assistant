@@ -17,6 +17,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,6 +31,10 @@ private const val ROUTE_LIST = "phases"
 private const val ROUTE_DETAIL = "phases/{phaseId}"
 private const val ROUTE_ACCOUNTS = "accounts"
 private const val ROUTE_PRINCIPLES = "principles"
+
+const val TAB_TAG_SETUP = "tab_setup"
+const val TAB_TAG_ACCOUNTS = "tab_accounts"
+const val TAB_TAG_PRINCIPLES = "tab_principles"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,19 +73,23 @@ fun AppScaffold() {
         },
         bottomBar = {
             NavigationBar {
+                // タブ名は画面タイトルにも出るため、テストから一意に押せるようタグを付ける
                 NavigationBarItem(
+                    modifier = Modifier.testTag(TAB_TAG_SETUP),
                     selected = route == ROUTE_LIST || isDetail,
                     onClick = { navController.switchTab(ROUTE_LIST) },
                     icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
                     label = { Text("セットアップ") }
                 )
                 NavigationBarItem(
+                    modifier = Modifier.testTag(TAB_TAG_ACCOUNTS),
                     selected = route == ROUTE_ACCOUNTS,
                     onClick = { navController.switchTab(ROUTE_ACCOUNTS) },
                     icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
                     label = { Text("アカウント") }
                 )
                 NavigationBarItem(
+                    modifier = Modifier.testTag(TAB_TAG_PRINCIPLES),
                     selected = route == ROUTE_PRINCIPLES,
                     onClick = { navController.switchTab(ROUTE_PRINCIPLES) },
                     icon = { Icon(Icons.Default.Shield, contentDescription = null) },

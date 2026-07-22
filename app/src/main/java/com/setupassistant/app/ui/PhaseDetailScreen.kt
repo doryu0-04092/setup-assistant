@@ -59,7 +59,10 @@ fun PhaseDetailScreen(phaseId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val repository = remember { ProgressRepository(context) }
     val editRepository = remember { UserEditRepository(context) }
-    val activeProfile = remember { AccountProfileRepository(context).getActive() }
+    // 参照のたびに読み直す。remember に包むと、後からアカウントを登録・切り替えしても
+    // 開いたことのある画面が古い値のままになる
+    val profileRepository = remember { AccountProfileRepository(context) }
+    val activeProfile = profileRepository.getActive()
     val scope = rememberCoroutineScope()
     val phase = remember(phaseId) { SetupContent.findPhase(phaseId) }
 

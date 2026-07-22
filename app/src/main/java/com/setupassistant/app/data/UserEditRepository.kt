@@ -56,6 +56,11 @@ class UserEditRepository(context: Context) {
             .apply()
     }
 
+    /** メモと上書きを全て消す。離任時のデータ消去とテストの初期化で使う */
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
     private fun android.content.SharedPreferences.Editor.putOrRemove(key: String, value: String?) {
         if (value.isNullOrBlank()) remove(key) else putString(key, value)
     }
