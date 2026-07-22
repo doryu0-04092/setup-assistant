@@ -17,7 +17,9 @@
 
 ## ダウンロード
 
-**[最新版のAPKをダウンロード](https://github.com/doryu0-04092/setup-assistant/releases/latest)**
+**[動作確認用のAPKをダウンロード](https://github.com/doryu0-04092/setup-assistant/releases/tag/dev)** — master の最新版から自動ビルドしている。スマホのブラウザでこのページを開けば、そのままインストールできる。
+
+正式リリース版は [Releases](https://github.com/doryu0-04092/setup-assistant/releases/latest) に置く(現時点では未公開)。
 
 ### インストール手順
 
