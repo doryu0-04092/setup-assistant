@@ -1,0 +1,70 @@
+name: Dev Build
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 同じ dev リリースを書き換えるため、同時に走らせない
+concurrency:
+  group: dev-build
+  cancel-in-progress: true
+
+jobs:
+  publish-debug-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install required Android SDK packages
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build debug APK
+        run: gradle assembleDebug
+
+      - name: Name the APK after the commit
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             "dist/setup-assistant-dev-$(git rev-parse --short HEAD).apk"
+
+      - name: Publish to the rolling dev release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: dev
+          name: 動作確認用ビルド (dev)
+          prerelease: true
+          # 毎回貼り替えるので、古いAPKは残さない
+          files: dist/*.apk
+          body: |
+            master の最新コミットから自動でビルドしている動作確認用のAPK。
+            正式なリリースではない。
+
+            - コミット: ${{ github.sha }}
+            - ビルド日時: ${{ github.event.head_commit.timestamp }}
+
+            ## スマホへのインストール手順
+
+            1. このページをAndroid端末のブラウザで開く
+            2. 下の `.apk` ファイルをタップしてダウンロードする
+            3. 「提供元不明のアプリ」の確認が出たら、案内に従って許可する
+            4. インストールして起動する
+
+            動作要件: Android 8.0 以降
+
+            すでに古い版を入れている場合は、そのまま上書きインストールできる。
