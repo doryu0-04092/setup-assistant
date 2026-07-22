@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.setupassistant.app.ui.theme.Spacing
 import com.setupassistant.app.data.AccountProfile
 import com.setupassistant.app.data.AccountProfileRepository
 import com.setupassistant.app.data.Repositories
@@ -69,8 +70,8 @@ fun AccountScreen(modifier: Modifier = Modifier) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             // 下端はFABが重なるぶん余分に空ける
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(start = Spacing.Large, end = Spacing.Large, top = Spacing.Large, bottom = 88.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
         ) {
             item {
                 Text(
@@ -174,8 +175,8 @@ private fun ProfileCard(
         }
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(Spacing.Large),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Small)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.setupassistant.app.ui.theme.Spacing
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
@@ -82,9 +83,9 @@ fun FormDialog(
                         .weight(1f)
                         .testTag(FORM_SCROLL_TAG)
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp)
-                        .padding(top = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(horizontal = Spacing.XLarge)
+                        .padding(top = Spacing.Small),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.Large)
                 ) {
                     content()
 
